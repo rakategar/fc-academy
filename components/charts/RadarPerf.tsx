@@ -1,5 +1,5 @@
 "use client";
-import { PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, ResponsiveContainer, Tooltip } from "recharts";
+import { PolarAngleAxis, PolarGrid, PolarRadiusAxis, Radar, RadarChart, Tooltip } from "recharts";
 import { ChartFrame, Legend, TooltipBox } from "./ChartFrame";
 
 export function RadarPerf({
@@ -16,8 +16,7 @@ export function RadarPerf({
     <div>
       {hasCompare && <Legend items={[{ name: "Pemain", color: "var(--accent)" }, { name: compareLabel ?? "Rata-rata tim", color: "var(--gold)" }]} />}
       <ChartFrame height={height}>
-        <ResponsiveContainer width="100%" height="100%">
-          <RadarChart data={data} outerRadius="72%">
+          <RadarChart responsive style={{ width: "100%", height: "100%" }} data={data} outerRadius="72%">
             <PolarGrid stroke="var(--line)" />
             <PolarAngleAxis dataKey="aspect" tick={{ fontSize: 12, fill: "var(--ink)" }} />
             <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
@@ -27,7 +26,6 @@ export function RadarPerf({
             <Radar name="Pemain" dataKey="value" stroke="var(--accent)" fill="var(--accent)" fillOpacity={0.25} strokeWidth={2} animationDuration={1000} />
             <Tooltip content={<TooltipBox />} />
           </RadarChart>
-        </ResponsiveContainer>
       </ChartFrame>
     </div>
   );

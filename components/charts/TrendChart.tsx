@@ -1,5 +1,5 @@
 "use client";
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Area, AreaChart, CartesianGrid, Tooltip, XAxis, YAxis } from "recharts";
 import { ChartFrame, Legend, TooltipBox, axisProps } from "./ChartFrame";
 
 export interface Series { key: string; name: string; color: string }
@@ -26,8 +26,7 @@ export function TrendChart({
     <div>
       {showLegend && series.length > 1 && <Legend items={series.map((s) => ({ name: s.name, color: s.color }))} />}
       <ChartFrame height={height}>
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={data} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
+          <AreaChart responsive style={{ width: "100%", height: "100%" }} data={data} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
             <defs>
               {series.map((s) => (
                 <linearGradient key={s.key} id={`g-${s.key}`} x1="0" y1="0" x2="0" y2="1">
@@ -58,7 +57,6 @@ export function TrendChart({
               />
             ))}
           </AreaChart>
-        </ResponsiveContainer>
       </ChartFrame>
     </div>
   );

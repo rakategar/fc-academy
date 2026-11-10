@@ -1,5 +1,5 @@
 "use client";
-import { Bar, BarChart, CartesianGrid, Cell, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, Cell, LabelList, Tooltip, XAxis, YAxis } from "recharts";
 import { ChartFrame, Legend, TooltipBox, axisProps } from "./ChartFrame";
 import type { Series } from "./TrendChart";
 
@@ -17,8 +17,7 @@ export function BarsChart({
 }) {
   return (
     <ChartFrame height={height}>
-      <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={data} margin={{ top: 22, right: 4, left: -18, bottom: 0 }}>
+        <BarChart responsive style={{ width: "100%", height: "100%" }} data={data} margin={{ top: 22, right: 4, left: -18, bottom: 0 }}>
           <CartesianGrid vertical={false} stroke="var(--line)" />
           <XAxis dataKey="label" {...axisProps} interval={0} />
           <YAxis {...axisProps} domain={[0, max ?? "auto"]} width={44} />
@@ -35,7 +34,6 @@ export function BarsChart({
             />
           </Bar>
         </BarChart>
-      </ResponsiveContainer>
     </ChartFrame>
   );
 }
@@ -56,8 +54,7 @@ export function StackedBars({
     <div>
       <Legend items={series.map((s) => ({ name: s.name, color: s.color }))} />
       <ChartFrame height={height}>
-        <ResponsiveContainer width="100%" height="100%">
-          <BarChart data={data} margin={{ top: 8, right: 4, left: -18, bottom: 0 }}>
+          <BarChart responsive style={{ width: "100%", height: "100%" }} data={data} margin={{ top: 8, right: 4, left: -18, bottom: 0 }}>
             <CartesianGrid vertical={false} stroke="var(--line)" />
             <XAxis dataKey={xKey} {...axisProps} minTickGap={8} />
             <YAxis {...axisProps} width={44} allowDecimals={false} />
@@ -76,7 +73,6 @@ export function StackedBars({
               />
             ))}
           </BarChart>
-        </ResponsiveContainer>
       </ChartFrame>
     </div>
   );

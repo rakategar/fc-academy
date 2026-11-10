@@ -1,5 +1,5 @@
 "use client";
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
+import { Cell, Pie, PieChart, Tooltip } from "recharts";
 import { ChartFrame, TooltipBox } from "./ChartFrame";
 import { CountUp } from "@/components/motion/CountUp";
 
@@ -19,8 +19,7 @@ export function DonutChart({
     <div className="flex flex-col items-center gap-5 sm:flex-row sm:items-center">
       <div className="relative shrink-0" style={{ width: size, height: size }}>
         <ChartFrame height={size}>
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
+            <PieChart responsive style={{ width: "100%", height: "100%" }}>
               <Pie
                 data={data}
                 dataKey="value"
@@ -40,7 +39,6 @@ export function DonutChart({
               </Pie>
               <Tooltip content={<TooltipBox />} />
             </PieChart>
-          </ResponsiveContainer>
         </ChartFrame>
         <div className="pointer-events-none absolute inset-0 grid place-items-center text-center">
           <div>

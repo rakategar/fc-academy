@@ -1,5 +1,5 @@
 "use client";
-import { CartesianGrid, ResponsiveContainer, Scatter, ScatterChart, Tooltip, XAxis, YAxis, ZAxis } from "recharts";
+import { CartesianGrid, Scatter, ScatterChart, Tooltip, XAxis, YAxis, ZAxis } from "recharts";
 import { ChartFrame, axisProps } from "./ChartFrame";
 
 export function ScatterPlot({
@@ -15,13 +15,16 @@ export function ScatterPlot({
 }) {
   return (
     <ChartFrame height={height}>
-      <ResponsiveContainer width="100%" height="100%">
-        <ScatterChart margin={{ top: 8, right: 12, left: -8, bottom: 16 }}>
+        <ScatterChart responsive style={{ width: "100%", height: "100%" }} margin={{ top: 8, right: 12, left: 8, bottom: 16 }}>
           <CartesianGrid stroke="var(--line)" />
-          <XAxis type="number" dataKey="x" name={xLabel} unit="%" domain={["dataMin - 5", 100]} {...axisProps}
+          <XAxis type="number" dataKey="x" name={xLabel} unit="%" {...axisProps}
+            domain={[(min: number) => Math.max(0, Math.floor((min - 5) / 10) * 10), 100]}
+            tickFormatter={(v: number) => String(Math.round(v))}
             label={{ value: xLabel, position: "insideBottom", offset: -10, fontSize: 11, fill: "var(--ink-muted)" }} />
-          <YAxis type="number" dataKey="y" name={yLabel} domain={["dataMin - 5", "dataMax + 3"]} {...axisProps} width={44}
-            label={{ value: yLabel, angle: -90, position: "insideLeft", offset: 18, fontSize: 11, fill: "var(--ink-muted)" }} />
+          <YAxis type="number" dataKey="y" name={yLabel} {...axisProps} width={40}
+            domain={[(min: number) => Math.floor((min - 3) / 5) * 5, (max: number) => Math.min(100, Math.ceil((max + 2) / 5) * 5)]}
+            tickFormatter={(v: number) => String(Math.round(v))}
+            label={{ value: yLabel, angle: -90, position: "insideLeft", offset: -2, fontSize: 11, fill: "var(--ink-muted)" }} />
           <ZAxis range={[46, 46]} />
           <Tooltip
             cursor={{ strokeDasharray: "3 3" }}
@@ -38,7 +41,6 @@ export function ScatterPlot({
           />
           <Scatter data={points} fill="var(--accent)" fillOpacity={0.75} animationDuration={900} />
         </ScatterChart>
-      </ResponsiveContainer>
     </ChartFrame>
   );
 }
