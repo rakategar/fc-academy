@@ -6,9 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "tsc --noEmit",
-    "seed": "node --env-file=.env.local scripts/seed.mjs",
-    "clear-demo": "node --env-file=.env.local scripts/clear-demo.mjs"
+    "lint": "tsc --noEmit"
   },
   "dependencies": {
     "@clerk/nextjs": "^7.9.25",
