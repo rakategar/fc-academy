@@ -1,0 +1,129 @@
+@import "tailwindcss";
+
+/* Token: struktur Duanda BI, palet brand UNESA FC (navy · biru · emas) */
+:root {
+  --ink: #0f1a2e;
+  --ink-muted: #56637a;
+  --ink-faint: #8a94a6;
+  --surface: #f3f6fb;
+  --panel: #ffffff;
+  --panel-sunken: #eef2f8;
+  --line: #e0e6ef;
+  --line-strong: #c6cfdd;
+
+  --brand: #0b2a6f;
+  --brand-hover: #082159;
+  --brand-soft: #e6edfb;
+  --brand-on: #ffffff;
+  --accent: #1e6bff;
+  --accent-soft: #e3edff;
+  --gold: #e0a526;
+  --gold-ink: #8a6000;
+  --gold-soft: #fcf3dc;
+  --nav: #0a1b47;
+  --nav-ink: #c9d4ee;
+  --nav-active: #1e6bff;
+
+  /* Status kehadiran — selalu dipasangkan dengan teks */
+  --hadir: #1f8a4c; --hadir-ink: #17643a; --hadir-bg: #e5f4ea;
+  --izin: #1e6bff;  --izin-ink: #1847a8;  --izin-bg: #e3edff;
+  --sakit: #c08400; --sakit-ink: #8a6000; --sakit-bg: #fbf2dc;
+  --alpa: #c4321f;  --alpa-ink: #962615;  --alpa-bg: #fbe7e3;
+
+  --gain: #1f8a4c;
+  --loss: #c4321f;
+
+  /* Kartu KPI bernuansa (gaya referensi klien) */
+  --tint-blue: #eaf1ff;
+  --tint-green: #e8f6ee;
+  --tint-purple: #f0ecfb;
+  --tint-orange: #fdf1e3;
+  --tint-sky: #e6f4fb;
+
+  --viz-1: #1e6bff;
+  --viz-2: #1f9d55;
+  --viz-3: #f59e0b;
+  --viz-4: #8b5cf6;
+  --viz-5: #0b2a6f;
+  --viz-6: #ef4444;
+  --viz-7: #94a3b8;
+
+  --shadow-dropdown: 0 4px 12px rgba(15, 26, 46, 0.1);
+  --shadow-modal: 0 16px 40px rgba(15, 26, 46, 0.18);
+}
+
+@theme inline {
+  --font-sans: var(--font-archivo), system-ui, -apple-system, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
+
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-surface: var(--surface);
+  --color-panel: var(--panel);
+  --color-sunken: var(--panel-sunken);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-brand: var(--brand);
+  --color-brand-hover: var(--brand-hover);
+  --color-brand-soft: var(--brand-soft);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-gold: var(--gold);
+  --color-gold-ink: var(--gold-ink);
+  --color-gold-soft: var(--gold-soft);
+  --color-nav: var(--nav);
+  --color-nav-ink: var(--nav-ink);
+  --color-hadir: var(--hadir);
+  --color-hadir-ink: var(--hadir-ink);
+  --color-hadir-bg: var(--hadir-bg);
+  --color-izin: var(--izin);
+  --color-izin-ink: var(--izin-ink);
+  --color-izin-bg: var(--izin-bg);
+  --color-sakit: var(--sakit);
+  --color-sakit-ink: var(--sakit-ink);
+  --color-sakit-bg: var(--sakit-bg);
+  --color-alpa: var(--alpa);
+  --color-alpa-ink: var(--alpa-ink);
+  --color-alpa-bg: var(--alpa-bg);
+  --color-gain: var(--gain);
+  --color-loss: var(--loss);
+  --color-tint-blue: var(--tint-blue);
+  --color-tint-green: var(--tint-green);
+  --color-tint-purple: var(--tint-purple);
+  --color-tint-orange: var(--tint-orange);
+  --color-tint-sky: var(--tint-sky);
+
+  --radius-input: 6px;
+  --radius-panel: 10px;
+  --radius-modal: 14px;
+  --shadow-dropdown: var(--shadow-dropdown);
+  --shadow-modal: var(--shadow-modal);
+}
+
+html, body { background: var(--surface); color: var(--ink); }
+body { font-family: var(--font-sans); -webkit-font-smoothing: antialiased; -webkit-tap-highlight-color: transparent; }
+::selection { background: var(--brand-soft); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.h1 { font-size: 22px; line-height: 30px; font-weight: 700; letter-spacing: -0.01em; }
+@media (min-width: 1024px) { .h1 { font-size: 26px; line-height: 34px; } }
+.h2 { font-size: 17px; line-height: 24px; font-weight: 650; }
+.caption { font-size: 12px; line-height: 16px; color: var(--ink-muted); }
+
+/* safe area untuk bilah tab bawah di HP */
+.pb-safe { padding-bottom: calc(env(safe-area-inset-bottom) + 76px); }
+@media (min-width: 768px) { .pb-safe { padding-bottom: 32px; } }
+
+@keyframes shimmer { 0% { opacity: .5 } 50% { opacity: 1 } 100% { opacity: .5 } }
+.skeleton { background: var(--panel-sunken); border-radius: 6px; animation: shimmer 1.4s ease-in-out infinite; }
+
+@keyframes shake { 0%,100% { transform: translateX(0) } 25%,75% { transform: translateX(-2px) } 50% { transform: translateX(2px) } }
+.shake { animation: shake 120ms linear 2; }
+
+input[type="range"] { accent-color: var(--accent); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 1ms !important; transition-duration: 1ms !important; }
+}
