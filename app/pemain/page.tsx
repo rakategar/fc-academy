@@ -3,19 +3,20 @@ import { Panel, EmptyState } from "@/components/ui/Panel";
 import { PeriodTabs } from "@/components/ui/PeriodTabs";
 import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { PlayerOverview } from "@/components/player/PlayerOverview";
-import { requireActivePlayer } from "@/lib/auth/player";
-import { getAgeGroups, getSessions } from "@/lib/data";
-import { addDays, dayName, fmtDate, fmtTimeRange, periodRange, todayISO } from "@/lib/format";
+import { requireActivePlayer } from "@/lib/auth/roles";
+import { eligiblePlayers, getAgeGroups, getMemberships, getPeriod, getSessions } from "@/lib/data";
+import { addDays, dayName, fmtDate, fmtTimeRange, todayISO } from "@/lib/format";
 
 export const metadata = { title: "Beranda" };
 
 export default async function PlayerHome({ searchParams }: { searchParams: Promise<{ periode?: string }> }) {
   const sp = await searchParams;
   const player = await requireActivePlayer();
-  const period = periodRange(sp.periode ?? "musim");
+  const period = await getPeriod(sp.periode, "musim");
   const today = todayISO();
-  const [sessions, groups] = await Promise.all([getSessions(today, addDays(today, 14)), getAgeGroups()]);
-  const mine = sessions.filter((s) => s.status === "terjadwal" && (s.age_group_id === null || s.age_group_id === player.age_group_id)).slice(0, 3);
+  const [sessions, groups, memberships] = await Promise.all([getSessions(today, addDays(today, 14)), getAgeGroups(), getMemberships({ playerId: player.id })]);
+  const myCoaches = new Set(memberships.filter((m) => !m.excluded).map((m) => m.coach_id));
+  const mine = sessions.filter((s) => s.status === "terjadwal" && s.coach_id && myCoaches.has(s.coach_id) && eligiblePlayers([player], s, null).length > 0).slice(0, 3);
   const group = groups.find((g) => g.id === player.age_group_id);
   const hour = Number(new Intl.DateTimeFormat("en-GB", { timeZone: "Asia/Jakarta", hour: "2-digit", hour12: false }).format(new Date()));
   const greet = hour < 11 ? "Selamat pagi" : hour < 15 ? "Selamat siang" : hour < 18 ? "Selamat sore" : "Selamat malam";

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/Button";
 import { inputCls } from "@/components/ui/Field";
 import { Stagger, Item, Bar } from "@/components/motion/Reveal";
 import { eligiblePlayers, getAgeGroups, getPlayers, getSessionAgg } from "@/lib/data";
+import { requireStaff } from "@/lib/scope";
 import { addDays, dayName, fmtDate, fmtTimeRange, todayISO } from "@/lib/format";
 import { SESSION_KINDS, type SessionAgg } from "@/lib/types";
 import { quickSessionToday } from "./actions";
@@ -14,7 +15,9 @@ export const metadata = { title: "Absensi Latihan" };
 
 export default async function AttendanceIndex() {
   const today = todayISO();
-  const [sessions, players, groups] = await Promise.all([getSessionAgg(addDays(today, -21), addDays(today, 7)), getPlayers({ status: "aktif" }), getAgeGroups()]);
+  const scope = await requireStaff("coach");
+  const squad = new Set(scope.ids ?? []);
+  const [sessions, players, groups] = await Promise.all([getSessionAgg(addDays(today, -21), addDays(today, 7), scope.coachId), getPlayers({ status: "aktif", ids: scope.ids }), getAgeGroups()]);
   const gName = new Map(groups.map((g) => [g.id, g.name]));
   const active = sessions.filter((s) => s.status !== "batal");
   const todays = active.filter((s) => s.session_date === today);
@@ -23,7 +26,7 @@ export default async function AttendanceIndex() {
   const recorded = active.filter((s) => s.session_date < today && s.total > 0).reverse();
 
   const Card = ({ s, highlight = false }: { s: SessionAgg; highlight?: boolean }) => {
-    const eligible = eligiblePlayers(players, s).length;
+    const eligible = eligiblePlayers(players, s, squad).length;
     const pct = s.total ? (s.hadir / s.total) * 100 : 0;
     return (
       <Link href={`/coach/absensi/${s.session_id}`} className={`flex items-center gap-3 rounded-[10px] border bg-panel p-3.5 transition hover:border-accent ${highlight ? "border-accent ring-2 ring-accent/15" : "border-line"}`}>
@@ -32,7 +35,7 @@ export default async function AttendanceIndex() {
         </span>
         <div className="min-w-0 flex-1">
           <p className="truncate font-medium">{s.kind}</p>
-          <p className="caption">{fmtDate(s.session_date)} · <span className="num">{fmtTimeRange(s.start_time, s.end_time)}</span> · {s.age_group_id ? gName.get(s.age_group_id) : "Semua kelompok"}</p>
+          <p className="caption">{fmtDate(s.session_date)} · <span className="num">{fmtTimeRange(s.start_time, s.end_time)}</span> · {s.age_group_id ? gName.get(s.age_group_id) : "Seluruh skuad"}{s.gk_only ? " · kiper" : ""}</p>
           {s.total > 0 && <Bar value={pct} className="mt-1.5 h-1.5" color="var(--hadir)" />}
         </div>
         <div className="text-right">
@@ -49,7 +52,7 @@ export default async function AttendanceIndex() {
 
   return (
     <>
-      <PageHeader icon={ClipboardCheck} title="Absensi latihan" subtitle="Pilih sesi, tandai kehadiran tiap pemain, lalu simpan sekali." />
+      <PageHeader icon={ClipboardCheck} title="Absensi latihan" subtitle="Sesi milikmu. Pilih sesi, tandai kehadiran tiap pemain di skuad, lalu simpan sekali." />
 
       <Panel title="Hari ini" subtitle={`${dayName(today)}, ${fmtDate(today)}`}>
         {todays.length ? (

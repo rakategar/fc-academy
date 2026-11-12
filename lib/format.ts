@@ -76,14 +76,10 @@ export const PERIODS: { key: PeriodKey; label: string }[] = [
   { key: "90", label: "90 hari" },
   { key: "musim", label: "Musim ini" },
 ];
-/** Musim mulai 1 Juli. */
-export function periodRange(key: string | undefined): { from: string; to: string; key: PeriodKey; label: string } {
-  const to = todayISO();
-  const k = (PERIODS.find((p) => p.key === key)?.key ?? "30") as PeriodKey;
-  if (k === "musim") {
-    const { y, m } = parts(to);
-    const startYear = m >= 7 ? y : y - 1;
-    return { from: `${startYear}-07-01`, to, key: k, label: `Musim ${startYear}/${startYear + 1}` };
-  }
-  return { from: addDays(to, -(Number(k) - 1)), to, key: k, label: `${PERIODS.find((p) => p.key === k)!.label} terakhir` };
+export interface Period { from: string; to: string; key: PeriodKey; label: string; seasonEnd?: string }
+
+/** Nilai skala 1–10 dengan koma: 7,4 */
+export function fmtScore(n: number | null | undefined): string {
+  if (n === null || n === undefined || Number.isNaN(n)) return "—";
+  return new Intl.NumberFormat("id-ID", { minimumFractionDigits: 1, maximumFractionDigits: 1 }).format(n);
 }

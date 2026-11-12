@@ -16,7 +16,7 @@ export function FilterSelect({ name, options, label, className = "" }: { name: s
         if (e.target.value) next.set(name, e.target.value); else next.delete(name);
         router.push(`${path}?${next}`);
       }}
-      className={`${inputCls} h-11 w-auto md:h-11 ${className}`}
+      className={`${inputCls.replace("w-full", "")} h-11 w-full sm:w-auto sm:max-w-[240px] md:h-11 ${className}`}
     >
       {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>

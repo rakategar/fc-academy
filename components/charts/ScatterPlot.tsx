@@ -34,7 +34,7 @@ export function ScatterPlot({
               return (
                 <div className="rounded-[8px] border border-line bg-panel px-3 py-2 text-xs shadow-[var(--shadow-dropdown)]">
                   <p className="font-semibold">{p.name}</p>
-                  <p className="num">Kehadiran {p.x.toLocaleString("id-ID")}% · Performa {p.y.toLocaleString("id-ID")}</p>
+                  <p className="num">Kehadiran {p.x.toLocaleString("id-ID")}% · Nilai {(p.y / 10).toLocaleString("id-ID", { maximumFractionDigits: 1 })}</p>
                 </div>
               );
             }}

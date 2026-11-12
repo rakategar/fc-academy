@@ -2,15 +2,15 @@ import { ClipboardCheck } from "lucide-react";
 import { PageHeader } from "@/components/ui/Panel";
 import { PeriodTabs } from "@/components/ui/PeriodTabs";
 import { PlayerOverview } from "@/components/player/PlayerOverview";
-import { requireActivePlayer } from "@/lib/auth/player";
-import { periodRange } from "@/lib/format";
+import { requireActivePlayer } from "@/lib/auth/roles";
+import { getPeriod } from "@/lib/data";
 
 export const metadata = { title: "Riwayat Absensi" };
 
 export default async function PlayerHistory({ searchParams }: { searchParams: Promise<{ periode?: string }> }) {
   const sp = await searchParams;
   const player = await requireActivePlayer();
-  const period = periodRange(sp.periode ?? "musim");
+  const period = await getPeriod(sp.periode, "musim");
   return (
     <>
       <PageHeader icon={ClipboardCheck} title="Riwayat absensi" subtitle="Catatan kehadiranmu di setiap sesi latihan." actions={<PeriodTabs current={period.key} basePath="/pemain/riwayat" />} />

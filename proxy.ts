@@ -1,18 +1,30 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
-import { COACH_COOKIE, verifyCoachToken } from "@/lib/auth/coach-token";
+import { ADMIN_COOKIE, verifyAdminToken } from "@/lib/auth/admin-token";
 
-const isCoachArea = createRouteMatcher(["/coach(.*)"]);
-const isCoachLogin = createRouteMatcher(["/coach/login"]);
-const isPlayerArea = createRouteMatcher(["/pemain(.*)", "/lengkapi-data", "/menunggu"]);
+// Halaman login masing-masing peran: /admin, /coach, / (pemain)
+const isAdminArea = createRouteMatcher(["/admin/(.*)"]);
+const isCoachArea = createRouteMatcher(["/coach/(.*)"]);
+const isPlayerArea = createRouteMatcher(["/pemain(.*)", "/daftar", "/menunggu"]);
 
 export default clerkMiddleware(async (auth, req) => {
-  if (isCoachArea(req) && !isCoachLogin(req)) {
-    const session = await verifyCoachToken(req.cookies.get(COACH_COOKIE)?.value);
-    if (!session) return NextResponse.redirect(new URL("/coach/login", req.url));
+  const path = req.nextUrl.pathname;
+  // Rute lama
+  if (path === "/login" || path.startsWith("/login/")) return NextResponse.redirect(new URL("/", req.url));
+  if (path === "/coach/login") return NextResponse.redirect(new URL("/coach", req.url));
+  if (path === "/lengkapi-data") return NextResponse.redirect(new URL("/daftar", req.url));
+
+  if (isAdminArea(req)) {
+    const session = await verifyAdminToken(req.cookies.get(ADMIN_COOKIE)?.value);
+    if (!session) return NextResponse.redirect(new URL("/admin", req.url));
+  }
+  if (isCoachArea(req)) {
+    const { userId } = await auth();
+    if (!userId) return NextResponse.redirect(new URL("/coach", req.url));
   }
   if (isPlayerArea(req)) {
-    await auth.protect();
+    const { userId } = await auth();
+    if (!userId) return NextResponse.redirect(new URL("/", req.url));
   }
 });
 

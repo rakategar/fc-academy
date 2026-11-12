@@ -1,6 +1,6 @@
-import type { AttendanceStatus, PlayerStatus } from "@/lib/types";
+import type { AttendanceStatus, CoachStatus, PlayerStatus } from "@/lib/types";
 import { ATTENDANCE_LABEL } from "@/lib/types";
-import { BAND_LABEL, scoreBand } from "@/lib/scoring";
+import { BAND_LABEL, scoreBand, valueBand } from "@/lib/scoring";
 
 type Tone = "hadir" | "izin" | "sakit" | "alpa" | "brand" | "gold" | "neutral";
 
@@ -33,7 +33,27 @@ export function AttendanceBadge({ status, short = false }: { status: AttendanceS
 export function PlayerStatusBadge({ status }: { status: PlayerStatus }) {
   if (status === "aktif") return <Badge tone="hadir">Aktif</Badge>;
   if (status === "pending") return <Badge tone="gold">Menunggu verifikasi</Badge>;
+  if (status === "ditolak") return <Badge tone="alpa">Ditolak</Badge>;
   return <Badge tone="neutral">Diarsipkan</Badge>;
+}
+
+export function CoachStatusBadge({ status }: { status: CoachStatus }) {
+  if (status === "aktif") return <Badge tone="hadir">Aktif</Badge>;
+  if (status === "pending") return <Badge tone="gold">Menunggu verifikasi</Badge>;
+  if (status === "ditolak") return <Badge tone="alpa">Ditolak</Badge>;
+  return <Badge tone="neutral">Nonaktif</Badge>;
+}
+
+/** Lencana untuk nilai penilaian skala 1–10. */
+export function ValueBadge({ value }: { value: number | null | undefined }) {
+  const band = valueBand(value);
+  if (!band) return <Badge tone="neutral">Belum dinilai</Badge>;
+  const tone: Tone = band === "unggul" ? "hadir" : band === "baik" ? "izin" : band === "cukup" ? "sakit" : "alpa";
+  return <Badge tone={tone}>{BAND_LABEL[band]}</Badge>;
+}
+
+export function SourceBadge({ source }: { source: "aturan" | "manual" }) {
+  return source === "manual" ? <Badge tone="gold">Manual</Badge> : <Badge tone="brand">Otomatis</Badge>;
 }
 
 export function ScoreBadge({ score }: { score: number | null | undefined }) {

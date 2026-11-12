@@ -1,7 +1,7 @@
 import { User } from "lucide-react";
 import { PageHeader, Panel, Avatar } from "@/components/ui/Panel";
 import { PlayerStatusBadge, PositionTag } from "@/components/ui/Badge";
-import { requireActivePlayer } from "@/lib/auth/player";
+import { requireActivePlayer } from "@/lib/auth/roles";
 import { getAgeGroups } from "@/lib/data";
 import { ageFrom, fmtDate } from "@/lib/format";
 import { POSITIONS } from "@/lib/types";
@@ -42,7 +42,7 @@ export default async function PlayerProfile() {
             </div>
           ))}
         </dl>
-        <p className="caption mt-4">Ada data yang keliru? Sampaikan ke coach — perubahan data pemain dilakukan oleh coach.</p>
+        <p className="caption mt-4">Ada data yang keliru? Sampaikan ke coach atau admin — perubahan data pemain dilakukan oleh admin akademi.</p>
       </Panel>
     </div>
   );

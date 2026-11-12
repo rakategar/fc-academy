@@ -3,6 +3,7 @@ import { PageHeader, Panel } from "@/components/ui/Panel";
 import { KpiCard } from "@/components/ui/KpiCard";
 import { Stagger, Item } from "@/components/motion/Reveal";
 import { getAgeGroups, getPlayers, getSessionAgg, getSessions } from "@/lib/data";
+import { requireStaff } from "@/lib/scope";
 import { addDays, dayName, fmtDate, fmtMonthYear, todayISO } from "@/lib/format";
 import { SessionManager, DAY_TONE, type SessionRow } from "./SessionManager";
 
@@ -15,21 +16,23 @@ export default async function SchedulePage({ searchParams }: { searchParams: Pro
   const scope = lihat === "lalu" ? "lalu" : "mendatang";
   const today = todayISO();
   const monthStart = today.slice(0, 8) + "01";
-  const [groups, players, upcoming, past, month, full] = await Promise.all([
+  const sc = await requireStaff("coach");
+  const [groupsAll, players, upcoming, past, month, full] = await Promise.all([
     getAgeGroups(),
-    getPlayers({ status: "aktif" }),
-    getSessionAgg(today, addDays(today, 120)),
-    getSessionAgg(addDays(today, -120), addDays(today, -1)),
-    getSessionAgg(monthStart, addDays(monthStart, 40)),
-    getSessions(addDays(today, -120), addDays(today, 120)),
+    getPlayers({ status: "aktif", ids: sc.ids }),
+    getSessionAgg(today, addDays(today, 120), sc.coachId),
+    getSessionAgg(addDays(today, -120), addDays(today, -1), sc.coachId),
+    getSessionAgg(monthStart, addDays(monthStart, 40), sc.coachId),
+    getSessions(addDays(today, -120), addDays(today, 120), sc.coachId),
   ]);
+  const groups = groupsAll.filter((g) => sc.coach!.age_group_ids.includes(g.id));
   const detail = new Map(full.map((s) => [s.id, s]));
-  const gName = new Map(groups.map((g) => [g.id, g.name]));
+  const gName = new Map(groupsAll.map((g) => [g.id, g.name]));
   const list = scope === "lalu" ? [...past].reverse() : upcoming;
   const rows: SessionRow[] = list.map((s) => ({
     id: s.session_id, date: s.session_date, dateLabel: fmtDate(s.session_date), day: dayName(s.session_date),
     start: s.start_time.slice(0, 5), end: s.end_time.slice(0, 5), kind: s.kind, focus: detail.get(s.session_id)?.focus ?? null,
-    groupId: s.age_group_id, group: s.age_group_id ? gName.get(s.age_group_id) ?? "—" : "Semua kelompok",
+    groupId: s.age_group_id, group: (s.age_group_id ? gName.get(s.age_group_id) ?? "—" : "Seluruh skuad") + (s.gk_only ? " · kiper" : ""),
     location: detail.get(s.session_id)?.location ?? "Lapangan UNESA", status: s.status, recorded: s.total,
   }));
 
@@ -46,9 +49,9 @@ export default async function SchedulePage({ searchParams }: { searchParams: Pro
 
   return (
     <>
-      <PageHeader icon={CalendarDays} title="Jadwal latihan" subtitle={`Sesi latihan ${fmtMonthYear(today)} dan seterusnya.`} />
+      <PageHeader icon={CalendarDays} title="Jadwal latihan" subtitle={`Sesi latihan milikmu · ${fmtMonthYear(today)} dan seterusnya.${sc.coach!.focus === "kiper" ? " Sesi coach kiper otomatis khusus kiper." : ""}`} />
       <Stagger className="grid grid-cols-2 gap-3 lg:grid-cols-5">
-        <Item><KpiCard icon={Users} tone="blue" value={players.length} label="Pemain aktif" /></Item>
+        <Item><KpiCard icon={Users} tone="blue" value={players.length} label="Pemain di skuad" /></Item>
         <Item><KpiCard icon={CalendarRange} tone="green" value={weekly.length} label="Hari latihan / minggu" /></Item>
         <Item><KpiCard icon={CalendarDays} tone="purple" value={monthSessions.length} label="Sesi bulan ini" /></Item>
         <Item><KpiCard icon={Timer} tone="orange" value={avgDur} label="Menit / sesi" caption="Rata-rata bulan ini" /></Item>

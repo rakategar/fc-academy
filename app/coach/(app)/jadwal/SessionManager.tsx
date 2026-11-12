@@ -43,7 +43,7 @@ function SessionForm({ row, groups, today, onDone }: { row: SessionRow | null; g
       <div className="grid grid-cols-2 gap-3">
         <Field label="Kelompok usia">
           <select name="age_group_id" defaultValue={row?.groupId ?? ""} className={inputCls}>
-            <option value="">Semua kelompok</option>
+            <option value="">Seluruh skuad</option>
             {groups.map((g) => <option key={g.id} value={g.id}>{g.name}</option>)}
           </select>
         </Field>

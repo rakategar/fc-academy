@@ -1,5 +1,5 @@
 import { AppShell } from "@/components/shell/AppShell";
-import { requireActivePlayer } from "@/lib/auth/player";
+import { requireActivePlayer } from "@/lib/auth/roles";
 
 export const dynamic = "force-dynamic";
 
