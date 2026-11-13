@@ -3,7 +3,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { AuthLayout } from "@/components/auth/AuthLayout";
 import { RoleConflict } from "@/components/auth/RoleConflict";
-import { getAccount } from "@/lib/auth/roles";
+import { getAccount, homeFor } from "@/lib/auth/roles";
 import { getAgeGroups } from "@/lib/data";
 import { RegisterForm } from "./RegisterForm";
 
@@ -14,7 +14,7 @@ export default async function PlayerRegister() {
   const account = await getAccount();
   if (!account.userId) redirect("/");
   const resubmit = account.kind === "player" && account.player.status === "ditolak";
-  if (account.kind === "player" && !resubmit) redirect(account.player.status === "aktif" ? "/pemain" : "/menunggu");
+  if (account.kind === "player" && !resubmit) redirect(homeFor(account));
   const [user, groups] = await Promise.all([currentUser(), getAgeGroups()]);
   const name = [user?.firstName, user?.lastName].filter(Boolean).join(" ");
   const p = resubmit ? account.player : null;

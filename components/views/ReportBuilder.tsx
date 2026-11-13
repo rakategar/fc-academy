@@ -7,6 +7,7 @@ import { exportExcel, exportPdf } from "@/lib/export/client";
 import type { Report } from "@/lib/export/types";
 import { Button } from "@/components/ui/Button";
 import { Field, inputCls } from "@/components/ui/Field";
+import { DateInput } from "@/components/ui/DateTimeInputs";
 
 const KINDS: { k: ReportKind; title: string; desc: string; icon: typeof FileText }[] = [
   { k: "absensi", title: "Rekap absensi", desc: "Jumlah hadir, izin, sakit, tanpa keterangan, dan persentase tiap pemain.", icon: CalendarCheck },
@@ -68,8 +69,8 @@ export function ReportBuilder({ role, groups, defaults }: { role: "admin" | "coa
           ))}
         </div>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Dari tanggal"><input type="date" value={from} max={to} onChange={(e) => { setFrom(e.target.value); setPreview(null); }} className={inputCls} /></Field>
-          <Field label="Sampai tanggal"><input type="date" value={to} min={from} onChange={(e) => { setTo(e.target.value); setPreview(null); }} className={inputCls} /></Field>
+          <Field label="Dari tanggal"><DateInput value={from} max={to} onChange={(v) => { if (v) { setFrom(v); setPreview(null); } }} /></Field>
+          <Field label="Sampai tanggal"><DateInput value={to} min={from} onChange={(v) => { if (v) { setTo(v); setPreview(null); } }} /></Field>
         </div>
         <Field label="Kelompok usia">
           <select value={group} onChange={(e) => { setGroup(e.target.value); setPreview(null); }} className={inputCls}>

@@ -11,7 +11,7 @@ export type ReportKind = "absensi" | "penilaian" | "item" | "skor" | "detail";
 export async function buildReport(role: StaffRole, kind: ReportKind, from: string, to: string, groupId: number | null): Promise<Report | { error: string }> {
   const scope = await requireStaff(role);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to) || from > to) return { error: "Rentang tanggal tidak valid." };
-  const [players, groups, stats] = await Promise.all([getPlayers({ status: ["aktif", "arsip"], ids: scope.ids }), getAgeGroups(), getPlayerStats(from, to, scope.ids)]);
+  const [players, groups, stats] = await Promise.all([getPlayers({ status: ["aktif", "cuti", "arsip"], ids: scope.ids }), getAgeGroups(), getPlayerStats(from, to, scope.ids, true)]);
   const gName = new Map(groups.map((g) => [g.id, g.name]));
   const inGroup = players.filter((p) => groupId === null || p.age_group_id === groupId);
   const ids = new Set(inGroup.map((p) => p.id));
@@ -23,7 +23,10 @@ export async function buildReport(role: StaffRole, kind: ReportKind, from: strin
     generatedBy: scope.actor.name,
   };
   const fileBase = `${from}_sd_${to}${groupId ? "_" + gName.get(groupId) : ""}`;
-  const active = inGroup.filter((p) => p.status === "aktif").sort((a, b) => a.full_name.localeCompare(b.full_name));
+  // laporan memuat pemain aktif + yang sedang cuti (riwayatnya di periode itu tetap dihitung), ditandai "(cuti)"
+  const active = inGroup.filter((p) => p.status === "aktif" || p.status === "cuti")
+    .map((p) => (p.status === "cuti" ? { ...p, full_name: `${p.full_name} (cuti)` } : p))
+    .sort((a, b) => a.full_name.localeCompare(b.full_name));
   const g = (id: number | null) => (id ? gName.get(id) ?? "—" : "—");
 
   if (kind === "absensi") {
@@ -105,7 +108,7 @@ export async function buildReport(role: StaffRole, kind: ReportKind, from: strin
   }
 
   if (kind === "skor") {
-    const ranked = active.map((p) => ({ p, s: sMap.get(p.id) })).sort((a, b) => (b.s?.total_score ?? -1) - (a.s?.total_score ?? -1));
+    const ranked = active.filter((p) => p.status === "aktif").map((p) => ({ p, s: sMap.get(p.id) })).sort((a, b) => (b.s?.total_score ?? -1) - (a.s?.total_score ?? -1));
     const rows = ranked.map(({ p, s }, i) => {
       const band = scoreBand(s?.total_score);
       return {

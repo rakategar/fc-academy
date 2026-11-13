@@ -3,6 +3,7 @@ import { useActionState } from "react";
 import { changePassword, saveGroups, saveItems, saveSeasons } from "./actions";
 import { Button } from "@/components/ui/Button";
 import { Field, inputCls } from "@/components/ui/Field";
+import { DateInput } from "@/components/ui/DateTimeInputs";
 import { CATEGORIES, type AgeGroup, type AssessmentItem, type Season } from "@/lib/types";
 
 function Msg({ s }: { s?: { error?: string; ok?: string } }) {
@@ -60,19 +61,19 @@ export function SeasonsForm({ seasons }: { seasons: Season[] }) {
     <form action={action} className="space-y-3">
       <ul className="space-y-2">
         {seasons.map((x) => (
-          <li key={x.id} className={`grid grid-cols-2 gap-2 rounded-[8px] border p-2.5 sm:grid-cols-[auto_1fr_150px_150px] sm:items-center ${x.is_active ? "border-accent bg-accent-soft/40" : "border-line"}`}>
+          <li key={x.id} className={`grid grid-cols-2 gap-2 rounded-[8px] border p-2.5 sm:grid-cols-[auto_1fr_160px_160px] sm:items-center ${x.is_active ? "border-accent bg-accent-soft/40" : "border-line"}`}>
             <input type="hidden" name="id" value={x.id} />
             <label className="col-span-2 flex items-center gap-2 text-sm sm:col-span-1"><input type="radio" name="active" value={x.id} defaultChecked={x.is_active} className="h-4 w-4" /> Aktif</label>
             <input name={`name_${x.id}`} defaultValue={x.name} className={`${inputCls} col-span-2 sm:col-span-1`} aria-label="Nama musim" />
-            <input type="date" name={`start_${x.id}`} defaultValue={x.start_date} className={inputCls} aria-label="Mulai" />
-            <input type="date" name={`end_${x.id}`} defaultValue={x.end_date} className={inputCls} aria-label="Selesai" />
+            <DateInput name={`start_${x.id}`} defaultValue={x.start_date} aria-label="Mulai" />
+            <DateInput name={`end_${x.id}`} defaultValue={x.end_date} aria-label="Selesai" />
           </li>
         ))}
-        <li className="grid grid-cols-2 gap-2 rounded-[8px] border border-dashed border-line-strong p-2.5 sm:grid-cols-[auto_1fr_150px_150px] sm:items-center">
+        <li className="grid grid-cols-2 gap-2 rounded-[8px] border border-dashed border-line-strong p-2.5 sm:grid-cols-[auto_1fr_160px_160px] sm:items-center">
           <label className="col-span-2 flex items-center gap-2 text-sm sm:col-span-1"><input type="radio" name="active" value="new" className="h-4 w-4" /> Aktif</label>
           <input name="new_name" placeholder="Musim baru, mis. Musim 2027/2028" className={`${inputCls} col-span-2 sm:col-span-1`} />
-          <input type="date" name="new_start" className={inputCls} aria-label="Mulai musim baru" />
-          <input type="date" name="new_end" className={inputCls} aria-label="Selesai musim baru" />
+          <DateInput name="new_start" aria-label="Mulai musim baru" />
+          <DateInput name="new_end" aria-label="Selesai musim baru" />
         </li>
       </ul>
       <p className="caption">“Musim ini” di dashboard, peringkat, laporan, dan halaman pemain memakai musim yang aktif. Hanya satu musim bisa aktif.</p>

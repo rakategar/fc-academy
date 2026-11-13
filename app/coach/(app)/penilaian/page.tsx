@@ -14,8 +14,8 @@ export const metadata = { title: "Penilaian 1–10" };
 export default async function AssessmentPage({ searchParams }: { searchParams: Promise<{ pemain?: string; ubah?: string }> }) {
   const [scope, sp] = await Promise.all([requireStaff("coach"), searchParams]);
   const today = todayISO();
-  const [players, groups, items, recentAll, sessions, editRow] = await Promise.all([
-    getPlayers({ status: "aktif", ids: scope.ids }),
+  const [squad, groups, items, recentAll, sessions, editRow] = await Promise.all([
+    getPlayers({ status: ["aktif", "cuti"], ids: scope.ids }),
     getAgeGroups(),
     getAssessmentItems(),
     getAssessments({ ids: scope.ids, from: addDays(today, -180) }),
@@ -33,8 +33,10 @@ export default async function AssessmentPage({ searchParams }: { searchParams: P
   const lastBy = new Map<string, Record<number, number>>();
   for (const [pid, aid] of lastIds) lastBy.set(pid, Object.fromEntries(scores.filter((s) => s.assessment_id === aid).map((s) => [s.item_id, s.score])));
 
+  // penilaian baru hanya untuk pemain aktif; penilaian lama pemain yang kini cuti tetap bisa diubah
+  const players = squad.filter((p) => p.status === "aktif" || p.id === edit?.player_id);
   const gName = new Map(groups.map((g) => [g.id, g.name]));
-  const pName = new Map(players.map((p) => [p.id, p.full_name]));
+  const pName = new Map(squad.map((p) => [p.id, p.full_name]));
   const mine = recentAll.filter((a) => a.coach_id === scope.coachId).slice(0, 25);
 
   return (

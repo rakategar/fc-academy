@@ -32,6 +32,7 @@ export function AttendanceBadge({ status, short = false }: { status: AttendanceS
 
 export function PlayerStatusBadge({ status }: { status: PlayerStatus }) {
   if (status === "aktif") return <Badge tone="hadir">Aktif</Badge>;
+  if (status === "cuti") return <Badge tone="sakit">Cuti</Badge>;
   if (status === "pending") return <Badge tone="gold">Menunggu verifikasi</Badge>;
   if (status === "ditolak") return <Badge tone="alpa">Ditolak</Badge>;
   return <Badge tone="neutral">Diarsipkan</Badge>;

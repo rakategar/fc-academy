@@ -21,6 +21,7 @@ export async function saveAssessment(_prev: AssessState | undefined, form: FormD
 
   const [player, items] = await Promise.all([getPlayer(player_id), getAssessmentItems()]);
   if (!player) return { error: "Pemain tidak ditemukan." };
+  if (!id && player.status !== "aktif") return { error: player.status === "cuti" ? "Pemain ini sedang cuti — penilaian baru bisa diberikan setelah cutinya diakhiri." : "Pemain ini tidak aktif." };
   const mine = itemsFor(items, player.position);
   const scores: { item_id: number; score: number; category: Category }[] = [];
   for (const it of mine) {

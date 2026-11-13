@@ -10,7 +10,7 @@ export const metadata = { title: "Pemain Saya" };
 export default async function MyPlayers() {
   const scope = await requireStaff("coach");
   const period = await getPeriod("musim");
-  const [players, groups, stats] = await Promise.all([getPlayers({ status: "aktif", ids: scope.ids }), getAgeGroups(), getPlayerStats(period.from, period.to, scope.ids)]);
+  const [players, groups, stats] = await Promise.all([getPlayers({ status: ["aktif", "cuti"], ids: scope.ids }), getAgeGroups(), getPlayerStats(period.from, period.to, scope.ids)]);
   const gName = new Map(groups.map((g) => [g.id, g.name]));
   const sMap = new Map(stats.map((s) => [s.player_id, s]));
   const rows: PlayerRow[] = players.map((p) => {
@@ -20,9 +20,10 @@ export default async function MyPlayers() {
       jersey: p.jersey_no, status: p.status, linked: !!p.clerk_user_id, attendance: s?.attendance_pct ?? null, perf: s?.perf_avg ?? null, score: s?.total_score ?? null,
     };
   });
+  const onLeave = players.filter((p) => p.status === "cuti").length;
   return (
     <>
-      <PageHeader icon={Users} title="Pemain saya" subtitle={`${players.length} pemain di skuadmu · ${period.label}. Penambahan atau perubahan data pemain dilakukan admin.`} />
+      <PageHeader icon={Users} title="Pemain saya" subtitle={`${players.length - onLeave} pemain aktif${onLeave ? ` + ${onLeave} cuti` : ""} di skuadmu · ${period.label}. Penambahan atau perubahan data pemain dilakukan admin.`} />
       <Panel bodyClassName="p-0 md:p-0">
         <PlayersTable rows={rows} groups={groups.filter((g) => players.some((p) => p.age_group_id === g.id)).map((g) => g.name)} basePath="/coach/pemain" />
       </Panel>

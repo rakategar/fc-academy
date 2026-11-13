@@ -11,6 +11,7 @@ export const metadata = { title: "Data Pemain" };
 
 const TABS = [
   { key: "aktif", label: "Aktif" },
+  { key: "cuti", label: "Cuti" },
   { key: "arsip", label: "Arsip" },
   { key: "ditolak", label: "Ditolak" },
 ] as const;
@@ -23,7 +24,7 @@ export default async function PlayersPage({ searchParams }: { searchParams: Prom
   const gName = new Map(groups.map((g) => [g.id, g.name]));
   const cName = new Map(coaches.map((c) => [c.id, c.full_name]));
   const sMap = new Map(stats.map((s) => [s.player_id, s]));
-  const counts = { aktif: 0, pending: 0, arsip: 0, ditolak: 0 };
+  const counts = { aktif: 0, cuti: 0, pending: 0, arsip: 0, ditolak: 0 };
   players.forEach((p) => counts[p.status]++);
 
   const rows: PlayerRow[] = players.filter((p) => p.status === tab).map((p) => {

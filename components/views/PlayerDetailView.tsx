@@ -1,16 +1,17 @@
 import { notFound } from "next/navigation";
-import { Activity, ChevronLeft, Mail, Pencil, Phone, ShieldCheck } from "lucide-react";
+import { Activity, CalendarOff, ChevronLeft, Mail, Pencil, Phone, ShieldCheck } from "lucide-react";
 import { Avatar, Panel } from "@/components/ui/Panel";
 import { LinkButton } from "@/components/ui/Button";
 import { PlayerStatusBadge, PositionTag, Badge } from "@/components/ui/Badge";
 import { PeriodTabs } from "@/components/ui/PeriodTabs";
 import { PlayerOverview } from "@/components/player/PlayerOverview";
 import { getAgeGroups, getCoaches, getMemberships, getPeriod, getPlayer } from "@/lib/data";
-import { ageFrom, fmtDate } from "@/lib/format";
+import { ageFrom, fmtDate, todayISO } from "@/lib/format";
 import { FOCUS_LABEL, POSITIONS } from "@/lib/types";
 import { inScope, type Scope } from "@/lib/scope";
 import { PlayerStatusButton } from "@/app/admin/(app)/pemain/[id]/PlayerActions";
 import { SquadMembership } from "@/app/admin/(app)/pemain/SquadMembership";
+import { LeaveControl } from "./LeaveControl";
 
 export async function PlayerDetailView({ scope, id, periode }: { scope: Scope; id: string; periode?: string }) {
   if (!inScope(scope, id)) notFound();
@@ -48,11 +49,13 @@ export async function PlayerDetailView({ scope, id, periode }: { scope: Scope; i
             {isAdmin ? (
               <>
                 <LinkButton href={`/admin/pemain/${player.id}/ubah`} variant="secondary"><Pencil size={17} /> Ubah data</LinkButton>
+                <LeaveControl role="admin" playerId={player.id} name={player.full_name} status={player.status} today={todayISO()} />
                 <PlayerStatusButton id={player.id} status={player.status} />
               </>
             ) : (
               <>
-                <LinkButton href={`/coach/penilaian?pemain=${player.id}`} variant="accent"><Activity size={17} /> Beri nilai</LinkButton>
+                {player.status === "aktif" && <LinkButton href={`/coach/penilaian?pemain=${player.id}`} variant="accent"><Activity size={17} /> Beri nilai</LinkButton>}
+                <LeaveControl role="coach" playerId={player.id} name={player.full_name} status={player.status} today={todayISO()} />
                 <LinkButton href={`/coach/analisis?pemain=${player.id}`} variant="secondary">Analisis</LinkButton>
               </>
             )}
@@ -64,6 +67,17 @@ export async function PlayerDetailView({ scope, id, periode }: { scope: Scope; i
           <div><dt className="caption">Kontak</dt><dd className="num flex items-center gap-1">{player.phone ? <><Phone size={13} />{player.phone}</> : "—"}</dd></div>
           <div className="min-w-0"><dt className="caption">Email</dt><dd className="flex items-center gap-1 truncate">{player.email ? <><Mail size={13} className="shrink-0" /><span className="truncate">{player.email}</span></> : "—"}</dd></div>
         </dl>
+        {player.status === "cuti" && (
+          <div className="mt-4 flex gap-3 rounded-[10px] border border-sakit/40 bg-sakit-bg p-3 text-sm text-sakit-ink">
+            <CalendarOff size={18} className="mt-0.5 shrink-0" />
+            <p>
+              <b>Sedang cuti</b> sejak {player.leave_since ? fmtDate(player.leave_since) : "—"}
+              {player.leave_until && <> · perkiraan kembali <b>{fmtDate(player.leave_until)}</b>{player.leave_until < todayISO() && " (sudah lewat — akhiri cuti bila pemain sudah kembali)"}</>}
+              <br />Alasan: {player.leave_reason ?? "—"}{player.leave_by && <> · dicatat oleh {player.leave_by}</>}
+              <br /><span className="opacity-80">Tidak masuk daftar absensi, penilaian baru, dan peringkat sampai cutinya diakhiri.</span>
+            </p>
+          </div>
+        )}
       </section>
 
       {isAdmin && (
@@ -71,12 +85,12 @@ export async function PlayerDetailView({ scope, id, periode }: { scope: Scope; i
           <SquadMembership
             fixed={{ playerId: player.id }}
             addLabel="Tambahkan ke skuad coach"
-            emptyText={player.status === "aktif" ? "Belum ada coach yang memegang pemain ini" : "Pemain tidak aktif — tidak masuk skuad mana pun"}
+            emptyText={player.status === "aktif" || player.status === "cuti" ? "Belum ada coach yang memegang pemain ini" : "Pemain tidak aktif — tidak masuk skuad mana pun"}
             rows={myCoaches.map((m) => {
               const c = cMap.get(m.coach_id)!;
               return { coachId: c.id, playerId: player.id, label: c.full_name, sub: `${FOCUS_LABEL[c.focus]} · ${gNames(c.age_group_ids)}${c.status !== "aktif" ? " · nonaktif" : ""}`, href: `/admin/coach/${c.id}`, source: m.source, excluded: m.excluded };
             })}
-            addOptions={player.status === "aktif" ? coaches.filter((c) => c.status === "aktif" && !myCoaches.some((m) => m.coach_id === c.id)).map((c) => ({ value: c.id, label: `${c.full_name} (${c.focus === "kiper" ? "kiper · " : ""}${gNames(c.age_group_ids)})` })) : []}
+            addOptions={player.status === "aktif" || player.status === "cuti" ? coaches.filter((c) => c.status === "aktif" && !myCoaches.some((m) => m.coach_id === c.id)).map((c) => ({ value: c.id, label: `${c.full_name} (${c.focus === "kiper" ? "kiper · " : ""}${gNames(c.age_group_ids)})` })) : []}
           />
         </Panel>
       )}

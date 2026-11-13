@@ -28,7 +28,7 @@ export const getAccount = cache(async (): Promise<Account> => {
 export function homeFor(a: Account): string {
   if (!a.userId) return "/";
   if (a.kind === "coach") return a.coach.status === "aktif" ? "/coach/dashboard" : "/coach/menunggu";
-  if (a.kind === "player") return a.player.status === "aktif" ? "/pemain" : a.player.status === "arsip" ? "/menunggu" : "/menunggu";
+  if (a.kind === "player") return a.player.status === "aktif" || a.player.status === "cuti" ? "/pemain" : "/menunggu";
   return "/";
 }
 
@@ -46,6 +46,7 @@ export async function requireActivePlayer(): Promise<Player> {
   if (!a.userId) redirect("/");
   if (a.kind === "coach") redirect("/?peran=coach");
   if (a.kind === "none") redirect("/daftar");
-  if (a.player.status !== "aktif") redirect("/menunggu");
+  // pemain cuti tetap boleh masuk (melihat riwayatnya), tapi tidak bisa absen mandiri
+  if (a.player.status !== "aktif" && a.player.status !== "cuti") redirect("/menunggu");
   return a.player;
 }

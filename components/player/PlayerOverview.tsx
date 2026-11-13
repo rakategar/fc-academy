@@ -30,8 +30,13 @@ export async function PlayerOverview({ playerId, from, to, periodLabel, self = f
   ]);
   const group = groups.find((g) => g.id === player.age_group_id);
   const peerIds = peers.filter((p) => p.age_group_id === player.age_group_id).map((p) => p.id);
-  const stats = await getPlayerStats(from, to, peerIds.length ? peerIds : [playerId]);
-  const me = stats.find((s) => s.player_id === playerId);
+  const active = player.status === "aktif";
+  const [stats, selfStats] = await Promise.all([
+    peerIds.length ? getPlayerStats(from, to, peerIds) : Promise.resolve([]),
+    // pemain cuti/arsip tidak ikut peringkat, tapi datanya sendiri tetap ditampilkan
+    active ? Promise.resolve(null) : getPlayerStats(from, to, [playerId], true),
+  ]);
+  const me = selfStats ? selfStats[0] : stats.find((s) => s.player_id === playerId);
   const ranked = stats.filter((s) => s.total_score !== null).sort((a, b) => (b.total_score ?? 0) - (a.total_score ?? 0));
   const rank = ranked.findIndex((s) => s.player_id === playerId) + 1;
   const band = scoreBand(me?.total_score);
@@ -64,6 +69,7 @@ export async function PlayerOverview({ playerId, from, to, periodLabel, self = f
             <div className="min-w-0">
               <p className="caption">{periodLabel}</p>
               <p className="mt-1 text-lg font-semibold">{band ? BAND_LABEL[band] : "Belum ada data"}</p>
+              {!active && <p className="mt-1 text-sm text-ink-muted">Tidak ikut peringkat selama {player.status === "cuti" ? "cuti" : "tidak aktif"}.</p>}
               {rank > 0 && (
                 <p className="mt-1 text-sm text-ink-muted">
                   <Trophy size={15} className="mr-1 inline align-[-2px] text-gold" />Peringkat <b className="num text-ink">#{rank}</b> dari <span className="num">{ranked.length}</span> di {group?.name ?? "kelompok"}

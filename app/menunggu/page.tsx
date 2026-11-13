@@ -17,7 +17,7 @@ export default async function Waiting() {
   if (account.kind === "coach") redirect("/coach/masuk");
   if (account.kind === "none") redirect("/daftar");
   const player = account.player;
-  if (player.status === "aktif") redirect("/pemain");
+  if (player.status === "aktif" || player.status === "cuti") redirect("/pemain");
   const state = player.status; // pending | ditolak | arsip
   const copy = {
     pending: { title: "Pendaftaran terkirim", sub: "Admin akademi akan memeriksa datamu. Setelah disetujui, kamu bisa melihat absensi, nilai, dan peringkat.", head: "Menunggu verifikasi admin" },

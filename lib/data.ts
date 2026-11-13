@@ -113,10 +113,11 @@ export async function getSessionAgg(from: string, to: string, coachId?: string |
 
 const num = (v: unknown) => (v === null || v === undefined ? null : Number(v));
 
-export async function getPlayerStats(from: string, to: string, ids: Ids = null): Promise<PlayerStat[]> {
+/** Default hanya pemain aktif. `allStatus` ikut menyertakan pemain cuti/arsip (laporan historis, profil pemain itu sendiri). */
+export async function getPlayerStats(from: string, to: string, ids: Ids = null, allStatus = false): Promise<PlayerStat[]> {
   if (ids && !ids.length) return [];
   const rows: PlayerStat[] = check(
-    await db().rpc("player_stats", { p_from: from, p_to: to, w_att: SCORE_WEIGHTS.attendance, w_perf: SCORE_WEIGHTS.performance, p_player_ids: ids }),
+    await db().rpc("player_stats", { p_from: from, p_to: to, w_att: SCORE_WEIGHTS.attendance, w_perf: SCORE_WEIGHTS.performance, p_player_ids: ids, p_all_status: allStatus }),
   );
   return rows.map((r) => ({
     ...r,

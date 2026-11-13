@@ -4,6 +4,7 @@ import { CopyCheck, Eraser, Save } from "lucide-react";
 import { saveAssessment } from "./actions";
 import { Button } from "@/components/ui/Button";
 import { Field, inputCls } from "@/components/ui/Field";
+import { DateInput } from "@/components/ui/DateTimeInputs";
 import { PositionTag } from "@/components/ui/Badge";
 import { valueTone } from "@/lib/scoring";
 import { CATEGORIES, type AssessmentItem, type Position } from "@/lib/types";
@@ -52,7 +53,7 @@ export function AssessmentForm({ players, items, sessions, today, defaultPlayer,
         {edit && <input type="hidden" name="player_id" value={player} />}
       </Field>
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Tanggal tes" required><input type="date" name="assessed_on" max={today} defaultValue={edit?.assessed_on ?? today} className={inputCls} required /></Field>
+        <Field label="Tanggal tes" required><DateInput name="assessed_on" max={today} defaultValue={edit?.assessed_on ?? today} required /></Field>
         <Field label="Sesi latihan" help="Opsional">
           <select name="session_id" className={inputCls} defaultValue={edit?.session_id ?? ""}>
             <option value="">Tanpa sesi tertentu</option>

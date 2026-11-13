@@ -32,9 +32,15 @@ export async function savePlayer(_prev: PlayerFormState | undefined, form: FormD
     team: String(form.get("team") ?? "").trim() || "UNESA FC ACADEMY",
     phone: String(form.get("phone") ?? "").trim() || null,
     jersey_no: jersey ? Number(jersey) : null,
-    status: ["aktif", "arsip", "pending"].includes(status) ? status : "aktif",
+    status,
     updated_at: new Date().toISOString(),
   };
+  // Form hanya boleh memilih aktif/arsip. Status lain (cuti, pending, ditolak) hanya boleh dipertahankan;
+  // perubahannya lewat tombol Cutikan atau menu Verifikasi agar alasan & penugasan skuad tercatat.
+  if (status !== "aktif" && status !== "arsip") {
+    const cur = id ? (await db().from("players").select("status").eq("id", id).maybeSingle()).data : null;
+    if (cur?.status !== status) return { error: status === "cuti" ? "Untuk mencutikan pemain, pakai tombol “Cutikan” di halaman pemain." : "Status tidak valid." };
+  }
 
   let playerId = id;
   if (id) {
@@ -53,6 +59,7 @@ export async function savePlayer(_prev: PlayerFormState | undefined, form: FormD
 
 export async function setPlayerStatus(id: string, status: PlayerStatus) {
   const scope = await admin();
+  if (status !== "aktif" && status !== "arsip") return; // cuti lewat startLeave, verifikasi lewat approve/reject
   await db().from("players").update({ status, reject_reason: null, updated_at: new Date().toISOString() }).eq("id", id);
   await syncSquads({ playerId: id });
   await logActivity(scope, { action: status === "aktif" ? "mengaktifkan / menyetujui pemain" : status === "arsip" ? "mengarsipkan pemain" : `mengubah status pemain → ${status}`, entity: "pemain", entityId: id, playerId: id });

@@ -1,5 +1,5 @@
 export type Position = "GK" | "DF" | "MF" | "FW";
-export type PlayerStatus = "pending" | "aktif" | "ditolak" | "arsip";
+export type PlayerStatus = "pending" | "aktif" | "cuti" | "ditolak" | "arsip";
 export type CoachStatus = "pending" | "aktif" | "ditolak" | "nonaktif";
 export type CoachFocus = "semua" | "kiper";
 export type Category = "fisik" | "teknik" | "taktik";
@@ -22,6 +22,11 @@ export interface Player {
   status: PlayerStatus;
   is_candidate: boolean;
   reject_reason: string | null;
+  /** Hanya terisi saat status = "cuti" (dijaga trigger DB). */
+  leave_reason: string | null;
+  leave_since: string | null;
+  leave_until: string | null;
+  leave_by: string | null;
   created_at: string;
 }
 

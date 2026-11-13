@@ -19,16 +19,26 @@ function parts(iso: string) {
   return { y, m, d, dow: new Date(Date.UTC(y, m - 1, d)).getUTCDay() };
 }
 
-/** 3 Nov 2026 */
+const p2 = (n: number) => String(n).padStart(2, "0");
+/** 03/11/2026 (tanggal/bulan/tahun) */
 export function fmtDate(iso: string | null | undefined): string {
   if (!iso) return "—";
   const { y, m, d } = parts(iso);
-  return `${d} ${MONTHS[m - 1]} ${y}`;
+  return `${p2(d)}/${p2(m)}/${y}`;
 }
-/** 3 Nov */
+/** 03/11 */
 export function fmtDateShort(iso: string): string {
   const { m, d } = parts(iso);
+  return `${p2(d)}/${p2(m)}`;
+}
+/** 3 Nov (untuk teks yang lebih santai) */
+export function fmtDayMonth(iso: string): string {
+  const { m, d } = parts(iso);
   return `${d} ${MONTHS[m - 1]}`;
+}
+/** Jam sekarang di WIB, format HH:MM (24 jam). */
+export function nowTimeWIB(): string {
+  return new Intl.DateTimeFormat("en-GB", { timeZone: TZ, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(new Date());
 }
 export function fmtMonthYear(iso: string): string {
   const { y, m } = parts(iso);
@@ -40,8 +50,8 @@ export function dayName(iso: string): string {
 export function fmtDateTime(ts: string): string {
   const d = new Date(ts);
   const date = new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(d);
-  const time = new Intl.DateTimeFormat("id-ID", { timeZone: TZ, hour: "2-digit", minute: "2-digit", hour12: false }).format(d);
-  return `${fmtDate(date)}, ${time.replace(".", ":")}`;
+  const time = new Intl.DateTimeFormat("en-GB", { timeZone: TZ, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).format(d);
+  return `${fmtDate(date)} ${time}`;
 }
 /** 15:30 – 17:00 */
 export function fmtTimeRange(a: string, b: string): string {

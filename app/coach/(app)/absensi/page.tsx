@@ -4,6 +4,7 @@ import { PageHeader, Panel, EmptyState } from "@/components/ui/Panel";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { inputCls } from "@/components/ui/Field";
+import { TimeInput } from "@/components/ui/DateTimeInputs";
 import { Stagger, Item, Bar } from "@/components/motion/Reveal";
 import { eligiblePlayers, getAgeGroups, getPlayers, getSessionAgg } from "@/lib/data";
 import { requireStaff } from "@/lib/scope";
@@ -61,10 +62,10 @@ export default async function AttendanceIndex() {
           <form action={quickSessionToday} className="rounded-[10px] border border-dashed border-line-strong p-4">
             <p className="font-medium">Tidak ada sesi terjadwal hari ini.</p>
             <p className="caption mb-3">Buat sesi sekarang untuk langsung mengisi absensi di lapangan.</p>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-[1fr_120px_120px_auto]">
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-[1fr_150px_150px_auto]">
               <select name="kind" className={`${inputCls} col-span-2 sm:col-span-1`} aria-label="Jenis latihan">{SESSION_KINDS.map((k) => <option key={k}>{k}</option>)}</select>
-              <input type="time" name="start_time" defaultValue="15:30" className={inputCls} aria-label="Mulai" />
-              <input type="time" name="end_time" defaultValue="17:00" className={inputCls} aria-label="Selesai" />
+              <TimeInput name="start_time" defaultValue="15:30" aria-label="Mulai" />
+              <TimeInput name="end_time" defaultValue="17:00" aria-label="Selesai" />
               <Button type="submit" variant="accent" className="col-span-2 sm:col-span-1"><CalendarPlus size={17} /> Buat & absen</Button>
             </div>
           </form>

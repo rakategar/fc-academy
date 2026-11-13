@@ -7,6 +7,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button, btn } from "@/components/ui/Button";
 import { Badge } from "@/components/ui/Badge";
 import { Field, inputCls } from "@/components/ui/Field";
+import { DateInput, TimeInput } from "@/components/ui/DateTimeInputs";
 import { EmptyState } from "@/components/ui/Panel";
 import { SESSION_KINDS, type AgeGroup, type SessionStatus } from "@/lib/types";
 
@@ -32,12 +33,12 @@ function SessionForm({ row, groups, today, onDone }: { row: SessionRow | null; g
     <form action={action} className="space-y-4">
       {row && <input type="hidden" name="id" value={row.id} />}
       <div className="grid grid-cols-2 gap-3">
-        <Field label="Tanggal" required className="col-span-2 sm:col-span-1"><input type="date" name="session_date" defaultValue={row?.date ?? today} className={inputCls} required /></Field>
+        <Field label="Tanggal" required className="col-span-2 sm:col-span-1"><DateInput name="session_date" defaultValue={row?.date ?? today} required /></Field>
         <Field label="Jenis latihan" required className="col-span-2 sm:col-span-1">
           <select name="kind" defaultValue={row?.kind ?? "Latihan Rutin"} className={inputCls}>{SESSION_KINDS.map((k) => <option key={k}>{k}</option>)}</select>
         </Field>
-        <Field label="Mulai" required><input type="time" name="start_time" defaultValue={row?.start ?? "15:30"} className={inputCls} required /></Field>
-        <Field label="Selesai" required><input type="time" name="end_time" defaultValue={row?.end ?? "17:00"} className={inputCls} required /></Field>
+        <Field label="Mulai" required><TimeInput name="start_time" defaultValue={row?.start ?? "15:30"} aria-label="Mulai" /></Field>
+        <Field label="Selesai" required><TimeInput name="end_time" defaultValue={row?.end ?? "17:00"} aria-label="Selesai" /></Field>
       </div>
       <Field label="Fokus materi" help="Mis. fisik, teknik, taktik"><input name="focus" defaultValue={row?.focus ?? ""} className={inputCls} /></Field>
       <div className="grid grid-cols-2 gap-3">

@@ -16,14 +16,15 @@ export const metadata = { title: "Detail Coach" };
 export default async function CoachDetail({ params }: { params: Promise<{ id: string }> }) {
   await requireStaff("admin");
   const { id } = await params;
-  const [coach, groups, memberships, players] = await Promise.all([getCoach(id), getAgeGroups(), getMemberships({ coachId: id }), getPlayers({ status: "aktif" })]);
+  const [coach, groups, memberships, players] = await Promise.all([getCoach(id), getAgeGroups(), getMemberships({ coachId: id }), getPlayers({ status: ["aktif", "cuti"] })]);
   if (!coach) notFound();
   const gName = new Map(groups.map((g) => [g.id, g.name]));
   const pMap = new Map(players.map((p) => [p.id, p]));
   const rows = memberships.filter((m) => pMap.has(m.player_id)).map((m) => {
     const p = pMap.get(m.player_id)!;
-    return { coachId: id, playerId: p.id, label: p.full_name, sub: `${p.position} · ${p.age_group_id ? gName.get(p.age_group_id) : "—"}`, href: `/admin/pemain/${p.id}`, source: m.source, excluded: m.excluded };
+    return { coachId: id, playerId: p.id, label: p.full_name, sub: `${p.position} · ${p.age_group_id ? gName.get(p.age_group_id) : "—"}${p.status === "cuti" ? " · cuti" : ""}`, href: `/admin/pemain/${p.id}`, source: m.source, excluded: m.excluded };
   }).sort((a, b) => a.label.localeCompare(b.label));
+  const cuti = memberships.filter((m) => !m.excluded && pMap.get(m.player_id)?.status === "cuti").length;
   const range = (g: { min_age: number; max_age: number }) => (g.max_age >= 99 ? `${g.min_age}+` : g.min_age === 0 ? `≤${g.max_age}` : `${g.min_age}–${g.max_age}`);
 
   return (
@@ -45,7 +46,7 @@ export default async function CoachDetail({ params }: { params: Promise<{ id: st
           <div className="min-w-0"><dt className="caption">Email</dt><dd className="flex items-center gap-1 truncate">{coach.email ? <><Mail size={13} className="shrink-0" /><span className="truncate">{coach.email}</span></> : "—"}</dd></div>
           <div><dt className="caption">No. HP</dt><dd className="num flex items-center gap-1">{coach.phone ? <><Phone size={13} />{coach.phone}</> : "—"}</dd></div>
           <div><dt className="caption">Terdaftar</dt><dd>{fmtDate(coach.created_at.slice(0, 10))}</dd></div>
-          <div><dt className="caption">Anggota skuad</dt><dd className="num">{rows.filter((r) => !r.excluded).length} pemain</dd></div>
+          <div><dt className="caption">Anggota skuad</dt><dd className="num">{rows.filter((r) => !r.excluded).length} pemain{cuti > 0 && ` (${cuti} cuti)`}</dd></div>
         </dl>
       </section>
 
@@ -59,7 +60,7 @@ export default async function CoachDetail({ params }: { params: Promise<{ id: st
             rows={rows}
             addLabel="Tambahkan pemain"
             emptyText="Skuad masih kosong"
-            addOptions={players.filter((p) => !memberships.some((m) => m.player_id === p.id)).map((p) => ({ value: p.id, label: `${p.full_name} · ${p.position} · ${p.age_group_id ? gName.get(p.age_group_id) : "—"}` }))}
+            addOptions={players.filter((p) => p.status === "aktif" && !memberships.some((m) => m.player_id === p.id)).map((p) => ({ value: p.id, label: `${p.full_name} · ${p.position} · ${p.age_group_id ? gName.get(p.age_group_id) : "—"}` }))}
           />
         </Panel>
       </div>

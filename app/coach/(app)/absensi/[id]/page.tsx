@@ -14,11 +14,11 @@ export default async function AttendancePage({ params }: { params: Promise<{ id:
   const scope = await requireStaff("coach");
   const session = await getSession(id);
   if (!session || session.coach_id !== scope.coachId) notFound();
-  const [players, groups, existing] = await Promise.all([getPlayers({ status: ["aktif", "arsip"] }), getAgeGroups(), getSessionAttendance(id)]);
+  const [players, groups, existing] = await Promise.all([getPlayers({ status: ["aktif", "cuti", "arsip"] }), getAgeGroups(), getSessionAttendance(id)]);
   const gName = new Map(groups.map((g) => [g.id, g.name]));
   const byPlayer = new Map(existing.map((a) => [a.player_id, a]));
   const eligible = eligiblePlayers(players, session, new Set(scope.ids ?? []));
-  // pemain yang sudah tercatat tapi kini diarsipkan tetap ditampilkan agar catatannya bisa diperbaiki
+  // pemain yang sudah tercatat tapi kini cuti/diarsipkan tetap ditampilkan agar catatannya bisa diperbaiki
   const extra = players.filter((p) => byPlayer.has(p.id) && !eligible.includes(p));
   const rows: SheetRow[] = [...eligible, ...extra].map((p) => ({
     id: p.id, name: p.full_name, position: p.position, group: p.age_group_id ? gName.get(p.age_group_id) ?? "—" : "—",

@@ -3,6 +3,7 @@ import { useActionState, useState } from "react";
 import { Send } from "lucide-react";
 import { registerPlayer } from "./actions";
 import { Field, inputCls } from "@/components/ui/Field";
+import { DateInput } from "@/components/ui/DateTimeInputs";
 import { Button } from "@/components/ui/Button";
 import { POSITIONS, type AgeGroup } from "@/lib/types";
 import { ageFrom, todayISO } from "@/lib/format";
@@ -21,7 +22,7 @@ export function RegisterForm({ defaultName, groups, initial }: { defaultName: st
         <input name="full_name" defaultValue={f?.full_name ?? defaultName} className={inputCls} autoComplete="name" required />
       </Field>
       <Field label="Tanggal lahir" required help={age !== null && age >= 0 ? <>Umur <b className="num">{age}</b> tahun{group ? <> · kelompok <b>{group.name}</b></> : null} — terhitung otomatis</> : "Umur dan kelompok usia dihitung otomatis"}>
-        <input name="birth_date" type="date" max={todayISO()} value={birth} onChange={(e) => setBirth(e.target.value)} className={inputCls} required />
+        <DateInput name="birth_date" max={todayISO()} value={birth} onChange={setBirth} required />
       </Field>
       <fieldset>
         <legend className="mb-1.5 text-sm font-medium">Posisi <span className="text-alpa">*</span></legend>

@@ -15,7 +15,9 @@ export async function saveAttendance(
   const scope = await requireStaff("coach");
   try { await assertSession(scope, sessionId); } catch (e) { return { error: (e as ScopeError).message }; }
   const { data: existing } = await db().from("attendance").select("player_id").eq("session_id", sessionId);
-  const allowed = new Set([...(scope.ids ?? []), ...(existing ?? []).map((r: { player_id: string }) => r.player_id)]);
+  // catatan baru hanya untuk pemain aktif di skuad; catatan lama (mis. pemain yang kini cuti) tetap boleh diperbaiki
+  const { data: activeRows } = scope.ids?.length ? await db().from("players").select("id").in("id", scope.ids).eq("status", "aktif") : { data: [] };
+  const allowed = new Set([...(activeRows ?? []).map((r: { id: string }) => r.id), ...(existing ?? []).map((r: { player_id: string }) => r.player_id)]);
   const clean = entries.filter((e) => VALID.has(e.status) && allowed.has(e.player_id));
   if (!clean.length) return { saved: 0 };
   const { data: session } = await db().from("training_sessions").select("session_date, status").eq("id", sessionId).maybeSingle();

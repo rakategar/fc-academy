@@ -48,7 +48,7 @@ export default async function PlayerHome({ searchParams }: { searchParams: Promi
               </li>
             ))}
           </ul>
-        ) : <EmptyState title="Belum ada jadwal baru">Coach belum menambahkan jadwal 2 minggu ke depan.</EmptyState>}
+        ) : player.status === "cuti" ? <EmptyState title="Sedang cuti">Jadwal latihan muncul lagi setelah coach mengakhiri cutimu.</EmptyState> : <EmptyState title="Belum ada jadwal baru">Coach belum menambahkan jadwal 2 minggu ke depan.</EmptyState>}
         {mine[0] && <p className="caption mt-3">Sesi terdekat: {dayName(mine[0].session_date)}, {fmtDate(mine[0].session_date)}. Datang 15 menit lebih awal untuk pemanasan.</p>}
       </Panel>
 

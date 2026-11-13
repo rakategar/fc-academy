@@ -3,6 +3,7 @@ import { useActionState, useState } from "react";
 import { Save } from "lucide-react";
 import { savePlayer } from "./actions";
 import { Field, inputCls } from "@/components/ui/Field";
+import { DateInput } from "@/components/ui/DateTimeInputs";
 import { Button, LinkButton } from "@/components/ui/Button";
 import { POSITIONS, type AgeGroup, type Player } from "@/lib/types";
 import { ageFrom, todayISO } from "@/lib/format";
@@ -23,7 +24,7 @@ export function PlayerForm({ player, groups }: { player?: Player; groups: AgeGro
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Tanggal lahir" required help={age !== null ? <>Umur <b className="num">{age}</b> tahun — terhitung otomatis</> : undefined}>
-            <input name="birth_date" type="date" max={todayISO()} value={birth} onChange={(e) => setBirth(e.target.value)} className={inputCls} required />
+            <DateInput name="birth_date" max={todayISO()} value={birth} onChange={setBirth} required />
           </Field>
           <Field label="Posisi" required>
             <select name="position" defaultValue={player?.position ?? ""} className={inputCls} required>
@@ -55,6 +56,10 @@ export function PlayerForm({ player, groups }: { player?: Player; groups: AgeGro
             <select name="status" defaultValue={player?.status ?? "aktif"} className={inputCls}>
               <option value="aktif">Aktif</option>
               <option value="arsip">Diarsipkan</option>
+              {/* status lain hanya bisa dipertahankan di sini; diubah lewat tombol Cutikan / menu Verifikasi */}
+              {player && player.status !== "aktif" && player.status !== "arsip" && (
+                <option value={player.status}>{{ cuti: "Cuti", pending: "Menunggu verifikasi", ditolak: "Ditolak" }[player.status]}</option>
+              )}
             </select>
           </Field>
         </div>
