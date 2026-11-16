@@ -7,7 +7,11 @@ import { RoleConflict } from "@/components/auth/RoleConflict";
 import { getAccount } from "@/lib/auth/roles";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Masuk Coach" };
+export const metadata = {
+  title: "Portal Coach",
+  description: "Portal coach UNESA FC Academy: kelola absensi latihan, penilaian pemain 1–10, analisis perkembangan, dan peringkat skuad.",
+  alternates: { canonical: "/coach" },
+};
 
 /** Halaman login coach (Google). */
 export default async function CoachLogin() {

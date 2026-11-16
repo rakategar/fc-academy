@@ -4,7 +4,7 @@ import { AuthLayout } from "@/components/auth/AuthLayout";
 import { getAdmin } from "@/lib/auth/admin";
 import { LoginForm } from "./LoginForm";
 
-export const metadata = { title: "Masuk Admin" };
+export const metadata = { title: "Masuk Admin", robots: { index: false, follow: false } };
 export const dynamic = "force-dynamic";
 
 export default async function AdminLogin() {

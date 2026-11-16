@@ -8,7 +8,12 @@ import { InstallPrompt } from "@/components/pwa/InstallPrompt";
 import { getAccount, homeFor } from "@/lib/auth/roles";
 
 export const dynamic = "force-dynamic";
-export const metadata = { title: "Masuk Pemain" };
+export const metadata = {
+  title: { absolute: "UNESA FC Academy — Akademi Sepak Bola Surabaya | Portal Pemain" },
+  description:
+    "Masuk ke portal pemain UNESA FC Academy dengan akun Google: lihat jadwal latihan, absensi, nilai fisik, teknik & taktik, dan peringkatmu.",
+  alternates: { canonical: "/" },
+};
 
 /** Halaman login pemain (Google). Coach masuk di /coach, admin di /admin. */
 export default async function PlayerLogin() {
