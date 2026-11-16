@@ -32,7 +32,6 @@ export async function DashboardView({ scope, periode }: { scope: Scope; periode?
   const prevTo = addDays(period.from, -1);
   const prevFrom = addDays(prevTo, -(days - 1));
   const today = todayISO();
-  const trendFrom = addDays(today, -90);
   const isAdmin = scope.role === "admin";
 
   const [players, groups, stats, prevStats, sessions, upcoming, assessments, pending, coaches, memberships] = await Promise.all([
@@ -40,9 +39,9 @@ export async function DashboardView({ scope, periode }: { scope: Scope; periode?
     getAgeGroups(),
     getPlayerStats(period.from, period.to, scope.ids),
     getPlayerStats(prevFrom, prevTo, scope.ids),
-    getSessionAgg(trendFrom < period.from ? trendFrom : period.from, period.to, scope.coachId),
+    getSessionAgg(period.from, period.to, scope.coachId),
     getSessionAgg(today, addDays(today, 14), scope.coachId),
-    getAssessments({ ids: scope.ids, from: trendFrom < period.from ? trendFrom : period.from, to: today }),
+    getAssessments({ ids: scope.ids, from: period.from, to: period.to }),
     isAdmin ? countPending() : Promise.resolve({ players: 0, coaches: 0 }),
     isAdmin ? getCoaches({ status: "aktif" }) : Promise.resolve([]),
     isAdmin ? getMemberships() : Promise.resolve([]),
@@ -54,7 +53,7 @@ export async function DashboardView({ scope, periode }: { scope: Scope; periode?
   const prevAttAvg = avg(prevStats.map((s) => s.attendance_pct));
   const valAvg = avg(stats.map((s) => s.perf_avg));
   const prevValAvg = avg(prevStats.map((s) => s.perf_avg));
-  const doneSessions = sessions.filter((s) => s.status === "selesai" && s.session_date >= period.from);
+  const doneSessions = sessions.filter((s) => s.status === "selesai");
 
   // persentase hadir per tanggal (gabungan semua sesi di hari itu)
   const perDay = new Map<string, { h: number; t: number }>();
@@ -67,7 +66,7 @@ export async function DashboardView({ scope, periode }: { scope: Scope; periode?
 
   // Tren nilai per tanggal penilaian
   const byDate = new Map<string, { f: number[]; t: number[]; k: number[] }>();
-  for (const a of assessments.filter((a) => a.assessed_on >= trendFrom)) {
+  for (const a of assessments.filter((a) => byId.has(a.player_id))) {
     const d = byDate.get(a.assessed_on) ?? { f: [], t: [], k: [] };
     d.f.push(a.fisik); d.t.push(a.teknik); d.k.push(a.taktik); byDate.set(a.assessed_on, d);
   }
@@ -133,7 +132,7 @@ export async function DashboardView({ scope, periode }: { scope: Scope; periode?
       </Stagger>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-12">
-        <Panel className="lg:col-span-7" icon={Activity} title="Tren nilai rata-rata" subtitle="Penilaian coach 1–10, 90 hari terakhir">
+        <Panel className="lg:col-span-7" icon={Activity} title="Tren nilai rata-rata" subtitle={`Penilaian coach 1–10 · ${period.label.toLowerCase()}`}>
           {valueTrend.length ? (
             <TrendChart data={valueTrend} series={CATEGORIES.map((c) => ({ key: c.key, name: c.label, color: c.color }))} domain={valueDomain(valueTrend.flatMap((v) => [v.fisik, v.teknik, v.taktik]))} />
           ) : <EmptyState title="Belum ada penilaian">{isAdmin ? "Penilaian diisi coach dari menu Penilaian 1–10." : "Mulai dari menu Penilaian 1–10."}</EmptyState>}
@@ -153,10 +152,10 @@ export async function DashboardView({ scope, periode }: { scope: Scope; periode?
       </div>
 
       <div className="mt-4 grid gap-4 lg:grid-cols-12">
-        <Panel className="lg:col-span-7" icon={CheckCircle2} title="Tren kehadiran latihan" subtitle="Persentase pemain hadir per hari latihan, 90 hari terakhir">
+        <Panel className="lg:col-span-7" icon={CheckCircle2} title="Tren kehadiran latihan" subtitle={`Persentase pemain hadir per hari latihan · ${period.label.toLowerCase()}`}>
           {trend.length ? <TrendChart data={trend} series={[{ key: "hadir", name: "Hadir", color: "var(--viz-1)" }]} unit="%" domain={[40, 100]} /> : <EmptyState title="Belum ada sesi yang diabsen">Isi absensi sesi pertama untuk melihat tren.</EmptyState>}
         </Panel>
-        <Panel className="lg:col-span-5" icon={BarChart3} title={isAdmin ? "Nilai per kelompok usia" : "Nilai per kategori"} subtitle="Rata-rata nilai 1–10">
+        <Panel className="lg:col-span-5" icon={BarChart3} title={isAdmin ? "Nilai per kelompok usia" : "Nilai per kategori"} subtitle={`Rata-rata nilai 1–10 · ${period.label.toLowerCase()}`}>
           {isAdmin
             ? groupBars.length ? <BarsChart data={groupBars.map((g) => ({ ...g, label: `${g.label} (${g.n})` }))} max={10} /> : <EmptyState title="Belum ada pemain aktif" />
             : <BarsChart data={catBars} max={10} />}
@@ -164,7 +163,7 @@ export async function DashboardView({ scope, periode }: { scope: Scope; periode?
       </div>
 
       {isAdmin && (
-        <Panel className="mt-4" icon={ShieldCheck} title="Ringkasan per coach" subtitle="Skuad aktif, rata-rata kehadiran, dan nilai" actions={<LinkButton href="/admin/coach" variant="ghost" size="sm">Kelola skuad ▸</LinkButton>} bodyClassName="p-0 md:p-0">
+        <Panel className="mt-4" icon={ShieldCheck} title="Ringkasan per coach" subtitle={`Skuad aktif, rata-rata kehadiran, dan nilai · ${period.label.toLowerCase()}`} actions={<LinkButton href="/admin/coach" variant="ghost" size="sm">Kelola skuad ▸</LinkButton>} bodyClassName="p-0 md:p-0">
           {squadRows.length ? (
             <div className="overflow-x-auto">
               <table className="w-full min-w-[560px] text-[13px]">
@@ -187,7 +186,7 @@ export async function DashboardView({ scope, periode }: { scope: Scope; periode?
       )}
 
       <div className="mt-4 grid gap-4 lg:grid-cols-12">
-        <Panel className="lg:col-span-7" icon={Trophy} title="5 pemain dengan skor tertinggi" actions={<LinkButton href={`${base}/peringkat`} variant="ghost" size="sm">Lihat peringkat ▸</LinkButton>} bodyClassName="p-0 md:p-0">
+        <Panel className="lg:col-span-7" icon={Trophy} title="5 pemain dengan skor tertinggi" subtitle={period.label} actions={<LinkButton href={`${base}/peringkat`} variant="ghost" size="sm">Lihat peringkat ▸</LinkButton>} bodyClassName="p-0 md:p-0">
           {top5.length ? (
             <ol className="divide-y divide-line">
               {top5.map((s, i) => {
