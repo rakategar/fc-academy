@@ -1,6 +1,6 @@
 import "server-only";
 import { cache } from "react";
-import { auth } from "@clerk/nextjs/server";
+import { auth, currentUser } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import { db } from "@/lib/supabase";
 import type { Coach, Player } from "@/lib/types";
@@ -21,8 +21,32 @@ export const getAccount = cache(async (): Promise<Account> => {
   ]);
   if (c.data) return { userId, kind: "coach", coach: c.data as Coach };
   if (p.data) return { userId, kind: "player", player: p.data as Player };
-  return { userId, kind: "none" };
+  const relinked = await relinkByEmail(userId);
+  return relinked ?? { userId, kind: "none" };
 });
+
+/**
+ * Akun yang dulu terdaftar memakai instance Clerk lain (mis. pindah dari mode development ke
+ * production) punya user ID baru. Tautkan ulang lewat email Google yang sudah terverifikasi,
+ * supaya coach/pemain lama tidak perlu mendaftar ulang.
+ */
+async function relinkByEmail(userId: string): Promise<Account | null> {
+  const user = await currentUser();
+  const emails = (user?.emailAddresses ?? [])
+    .filter((e) => e.verification?.status === "verified")
+    .map((e) => e.emailAddress.toLowerCase());
+  if (!emails.length) return null;
+  for (const table of ["coaches", "players"] as const) {
+    const { data } = await db().from(table).select("*").in("email", emails).neq("clerk_user_id", userId).limit(2);
+    if (data?.length !== 1) continue; // tidak ada, atau ambigu → biarkan admin yang menautkan
+    const { data: row } = await db().from(table).update({ clerk_user_id: userId }).eq("id", data[0].id).select("*").single();
+    if (!row) continue;
+    return table === "coaches"
+      ? { userId, kind: "coach", coach: row as Coach }
+      : { userId, kind: "player", player: row as Player };
+  }
+  return null;
+}
 
 /** Ke mana akun ini seharusnya pergi setelah login. */
 export function homeFor(a: Account): string {

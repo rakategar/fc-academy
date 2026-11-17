@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, JetBrains_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
+import { idID } from "@clerk/localizations";
 import { RegisterSW } from "@/components/pwa/RegisterSW";
 import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from "@/lib/site";
 import "./globals.css";
@@ -52,6 +53,7 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <ClerkProvider
+      localization={idID}
       appearance={{
         variables: { colorPrimary: "#0b2a6f", fontFamily: "var(--font-archivo)", borderRadius: "8px" },
       }}
